@@ -1,0 +1,90 @@
+import React, { useState } from 'react';
+
+function App() {
+  const [jsonData, setJsonData] = useState('');
+  const [responseData, setResponseData] = useState(null);
+  const [filter, setFilter] = useState([]);
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/bfhl', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: jsonData,
+      });
+      const data = await response.json();
+      setResponseData(data);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const filteredResponse = () => {
+    if (!responseData) return null;
+    const { numbers, alphabets, highest_lowercase_alphabet } = responseData;
+    return {
+      numbers: filter.includes('Numbers') ? numbers : [],
+      alphabets: filter.includes('Alphabets') ? alphabets : [],
+      highest_lowercase_alphabet: filter.includes('Highest Lowercase Alphabet') ? highest_lowercase_alphabet : [],
+    };
+  };
+
+  return (
+    <div>
+      <h1>{responseData ? responseData.roll_number : 'SRM Qualifier'}</h1>
+      <textarea
+        value={jsonData}
+        onChange={(e) => setJsonData(e.target.value)}
+        placeholder='Enter JSON data here'
+      />
+      <button onClick={handleSubmit}>Submit</button>
+
+      {responseData && (
+        <div>
+          <h2>Response</h2>
+          <div>
+            <label>
+              <input
+                type='checkbox'
+                value='Numbers'
+                onChange={(e) =>
+                  setFilter(
+                    e.target.checked ? [...filter, e.target.value] : filter.filter((f) => f !== e.target.value)
+                  )
+                }
+              />
+              Numbers
+            </label>
+            <label>
+              <input
+                type='checkbox'
+                value='Alphabets'
+                onChange={(e) =>
+                  setFilter(
+                    e.target.checked ? [...filter, e.target.value] : filter.filter((f) => f !== e.target.value)
+                  )
+                }
+              />
+              Alphabets
+            </label>
+            <label>
+              <input
+                type='checkbox'
+                value='Highest Lowercase Alphabet'
+                onChange={(e) =>
+                  setFilter(
+                    e.target.checked ? [...filter, e.target.value] : filter.filter((f) => f !== e.target.value)
+                  )
+                }
+              />
+              Highest Lowercase Alphabet
+            </label>
+          </div>
+          <pre>{JSON.stringify(filteredResponse(), null, 2)}</pre>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
